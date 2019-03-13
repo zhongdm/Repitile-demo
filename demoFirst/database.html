@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  
+</body>
+<script>
+  function openDB (name,version) {
+    var version=version || 1;
+    var idbRequest=window.indexedDB.open(name,version);
+    idbRequest.onerror=function(e){
+        console.log(e.currentTarget.error.message);
+    };
+    idbRequest.onsuccess=function(e){
+        myDB.db=e.target.result;
+    };
+    idbRequest.onupgradeneeded=function(e){
+        var db=e.target.result;
+        if(!db.objectStoreNames.contains('students')){
+            //db.createObjectStore('students',{autoIncrement: true});//keyGenerator
+            db.createObjectStore('students',{keyPath:"id"});
+        }
+        console.log('DB version changed to '+version);
+    };
+}
+
+function saveData (dbName, version, storeName, data) {
+    var idbRequest = indexedDB.open(dbName, version);
+
+    idbRequest.onsuccess = function (e) {
+        var db = idbRequest.result; 
+        var transaction = db.transaction(storeName, 'readwrite');//需先创建事务
+        var store = transaction.objectStore(storeName); //访问事务中的objectStore
+        data.forEach(function (item) {
+            store.add(item);//保存数据
+        });
+        console.log('save data done..');
+    }
+}
+
+openDB('test', 1)
+</script>
+</html>
